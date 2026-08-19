@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+
+      - name: Lint PHP files
+        run: |
+          php -l extension.php
+          php -l configure.phtml
+          php -l i18n/en/ext.php
+          php -l i18n/zh-cn/ext.php
+
+      - name: Check JavaScript
+        run: node --check static/icon-fetcher.js
+
+      - name: Validate metadata
+        run: python3 -c 'import json; json.load(open("metadata.json")); print("metadata.json: valid")'
