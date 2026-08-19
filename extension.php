@@ -168,10 +168,11 @@ final class IconFetcherExtension extends Minz_Extension
 			return;
 		}
 
+		// force so the preview refreshes on click; only update_icon persists to the DB.
 		$this->setIconForFeed(
 			$feed,
 			setValues: $action === 'update_icon',
-			force: $action === 'update_icon',
+			force: true,
 		);
 
 		if ($action === 'query_icon_info') {
@@ -275,6 +276,7 @@ final class IconFetcherExtension extends Minz_Extension
 		$response = $this->request($pageUrl, $feed, 'html', '', $force);
 		$html = is_string($response['body'] ?? null) ? $response['body'] : '';
 		$effectiveUrl = is_string($response['effective_url'] ?? null) ? $response['effective_url'] : $pageUrl;
+		$this->collectYoutubeAvatarCandidates($effectiveUrl, $html, $candidates);
 
 		if ($html !== '' && strlen($html) <= self::MAX_HTML_BYTES) {
 			$dom = new DOMDocument();
@@ -401,7 +403,16 @@ final class IconFetcherExtension extends Minz_Extension
 	private function feedPageUrl(FreshRSS_Feed $feed): ?string {
 		$website = trim($feed->website());
 		$url = $website !== '' ? $website : trim($feed->url());
-		return $this->checkedUrl($url);
+		$checked = $this->checkedUrl($url);
+		if ($checked === null) {
+			return null;
+		}
+		if (preg_match('#^https?://(?:www\.|m\.)?youtube\.com/feeds/videos\.xml#i', $checked) === 1
+			&& preg_match('/[?&]channel_id=([A-Za-z0-9_-]+)/', $checked, $match) === 1) {
+			// The feeds URL exposes no channel avatar; use the channel page instead.
+			return $this->checkedUrl('https://www.youtube.com/channel/' . $match[1]);
+		}
+		return $checked;
 	}
 
 	/**
@@ -537,6 +548,39 @@ final class IconFetcherExtension extends Minz_Extension
 				$this->walkJsonLd($decoded, $baseUrl, $candidates);
 			}
 		}
+	}
+
+	/**
+	 * YouTube channel pages are larger than MAX_HTML_BYTES, so the DOM parser is
+	 * skipped. Read the channel avatar (og:image) from the raw HTML instead.
+	 *
+	 * @param array<string,array{url:string,score:int,size:int,source:string}> $candidates
+	 */
+	private function collectYoutubeAvatarCandidates(string $effectiveUrl, string $html, array &$candidates): void {
+		if (preg_match('#^https?://(www\.|m\.)?youtube\.com/#i', $effectiveUrl) !== 1) {
+			return;
+		}
+
+		$match = [];
+		$isOgImage = preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)/i', $html, $match) === 1
+			|| preg_match('/<meta[^>]*content=["\']([^"\']+)["\'][^>]*property=["\']og:image["\']/i', $html, $match) === 1;
+		if (!$isOgImage) {
+			return;
+		}
+
+		$url = $this->resolveUrl($effectiveUrl, html_entity_decode(trim($match[1]), ENT_QUOTES));
+		if ($url === null) {
+			return;
+		}
+
+		$this->addCandidate(
+			$candidates,
+			$url,
+			95,
+			900,
+			'invalid YouTube channel avatar',
+			'YouTube channel avatar',
+		);
 	}
 
 	/**
