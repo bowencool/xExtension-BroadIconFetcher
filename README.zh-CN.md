@@ -27,13 +27,11 @@
 
 支持相对 URL、协议相对 URL、HTML `<base>`，以及 JSON/XML 订阅源响应。
 
-## 截图与视频演示
+## 截图与动图演示
 
 ### 单个订阅源操作
 
-<video src="screenshots/one.mp4" controls muted loop playsinline>
-  你的浏览器不支持 video 标签。
-</video>
+![FreshRSS 中刷新单个订阅源图标](screenshots/one.gif)
 
 ### 批量操作
 

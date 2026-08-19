@@ -56,13 +56,11 @@ Read channel.image.url from RSS/RSSHub
 Store the icon using FreshRSS's native favicon system
 ```
 
-### Screenshots and video demo
+### Screenshots and animated demo
 
 #### Single-feed action
 
-<video src="screenshots/one.mp4" controls muted loop playsinline>
-  Your browser does not support the video tag.
-</video>
+![Refreshing an icon for one feed in FreshRSS](screenshots/one.gif)
 
 #### Bulk actions
 
