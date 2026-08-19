@@ -224,7 +224,7 @@ final class IconFetcherExtension extends Minz_Extension
 		try {
 			$path = $feed->setCustomFavicon(
 				extName: $this->getName(),
-				disallowDelete: true,
+				disallowDelete: false,
 				values: $values,
 			);
 			if ($path === null) {
@@ -242,7 +242,7 @@ final class IconFetcherExtension extends Minz_Extension
 		}
 
 		$feed->_attributes($oldAttributes);
-		$icon = $this->discoverIcon($feed);
+		$icon = $this->discoverIcon($feed, $force);
 		if ($icon === null) {
 			$this->warning('No usable icon found for feed “' . $feed->name(true) . '”.');
 			return false;
@@ -252,7 +252,7 @@ final class IconFetcherExtension extends Minz_Extension
 			$feed->setCustomFavicon(
 				$icon['contents'],
 				extName: $this->getName(),
-				disallowDelete: true,
+				disallowDelete: false,
 				values: $values,
 				overrideCustomIcon: true,
 			);
@@ -268,15 +268,15 @@ final class IconFetcherExtension extends Minz_Extension
 	/**
 	 * @return array{contents:string,source:string}|null
 	 */
-	private function discoverIcon(FreshRSS_Feed $feed): ?array {
+	private function discoverIcon(FreshRSS_Feed $feed, bool $force = false): ?array {
 		$pageUrl = $this->feedPageUrl($feed);
 		if ($pageUrl === null) {
 			return null;
 		}
 
 		$candidates = [];
-		$this->collectChannelImageCandidates($feed, $candidates);
-		$response = $this->request($pageUrl, $feed, 'html');
+		$this->collectChannelImageCandidates($feed, $candidates, $force);
+		$response = $this->request($pageUrl, $feed, 'html', '', $force);
 		$html = is_string($response['body'] ?? null) ? $response['body'] : '';
 		$effectiveUrl = is_string($response['effective_url'] ?? null) ? $response['effective_url'] : $pageUrl;
 
@@ -285,7 +285,7 @@ final class IconFetcherExtension extends Minz_Extension
 			if (@$dom->loadHTML($html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING)) {
 				$xpath = new DOMXPath($dom);
 				$baseUrl = $this->documentBaseUrl($xpath, $effectiveUrl) ?? $effectiveUrl;
-				$this->collectLinkCandidates($xpath, $baseUrl, $feed, $candidates);
+				$this->collectLinkCandidates($xpath, $baseUrl, $feed, $candidates, $force);
 				$this->collectMetaCandidates($xpath, $baseUrl, $candidates);
 				$this->collectJsonLdCandidates($xpath, $baseUrl, $candidates);
 			}
@@ -302,7 +302,7 @@ final class IconFetcherExtension extends Minz_Extension
 		});
 
 		foreach ($candidates as $candidate) {
-			$iconResponse = $this->request($candidate['url'], $feed, 'ico', $effectiveUrl);
+			$iconResponse = $this->request($candidate['url'], $feed, 'ico', $effectiveUrl, $force);
 			$contents = $iconResponse['body'] ?? null;
 			if (!is_string($contents) || !$this->isImage($contents)) {
 				continue;
@@ -325,13 +325,13 @@ final class IconFetcherExtension extends Minz_Extension
 	 *
 	 * @param array<string,array{url:string,score:int,size:int,source:string}> $candidates
 	 */
-	private function collectChannelImageCandidates(FreshRSS_Feed $feed, array &$candidates): void {
+	private function collectChannelImageCandidates(FreshRSS_Feed $feed, array &$candidates, bool $force = false): void {
 		$feedUrl = $this->checkedUrl(trim($feed->url()));
 		if ($feedUrl === null) {
 			return;
 		}
 
-		$response = $this->request($feedUrl, $feed, 'html');
+		$response = $this->request($feedUrl, $feed, 'xml', '', $force);
 		$body = $response['body'] ?? null;
 		if (!is_string($body) || $body === '' || strlen($body) > self::MAX_HTML_BYTES) {
 			return;
@@ -411,7 +411,7 @@ final class IconFetcherExtension extends Minz_Extension
 	/**
 	 * @param array<string,array{url:string,score:int,size:int,source:string}> $candidates
 	 */
-	private function collectLinkCandidates(DOMXPath $xpath, string $baseUrl, FreshRSS_Feed $feed, array &$candidates): void {
+	private function collectLinkCandidates(DOMXPath $xpath, string $baseUrl, FreshRSS_Feed $feed, array &$candidates, bool $force = false): void {
 		$links = $xpath->query('//link[@href]');
 		if (!($links instanceof DOMNodeList)) {
 			return;
@@ -426,7 +426,7 @@ final class IconFetcherExtension extends Minz_Extension
 			$href = trim($link->getAttribute('href'));
 			if ($href === '' || in_array('manifest', $relations, true)) {
 				if ($href !== '' && in_array('manifest', $relations, true)) {
-					$this->collectManifestCandidates($baseUrl, $href, $feed, $candidates);
+					$this->collectManifestCandidates($baseUrl, $href, $feed, $candidates, $force);
 				}
 				continue;
 			}
@@ -459,13 +459,13 @@ final class IconFetcherExtension extends Minz_Extension
 	/**
 	 * @param array<string,array{url:string,score:int,size:int,source:string}> $candidates
 	 */
-	private function collectManifestCandidates(string $baseUrl, string $manifestHref, FreshRSS_Feed $feed, array &$candidates): void {
+	private function collectManifestCandidates(string $baseUrl, string $manifestHref, FreshRSS_Feed $feed, array &$candidates, bool $force = false): void {
 		$manifestUrl = $this->resolveUrl($baseUrl, $manifestHref);
 		if ($manifestUrl === null) {
 			return;
 		}
 
-		$response = $this->request($manifestUrl, $feed, 'html', $baseUrl);
+		$response = $this->request($manifestUrl, $feed, 'json', $baseUrl, $force);
 		$body = $response['body'] ?? null;
 		if (!is_string($body) || $body === '' || strlen($body) > self::MAX_MANIFEST_BYTES) {
 			return;
@@ -680,14 +680,14 @@ final class IconFetcherExtension extends Minz_Extension
 	/**
 	 * @return array<string,mixed>
 	 */
-	private function request(string $url, FreshRSS_Feed $feed, string $type, string $referer = ''): array {
+	private function request(string $url, FreshRSS_Feed $feed, string $type, string $referer = '', bool $noCache = false): array {
 		$options = $feed->attributeArray('curl_params');
 		$options = is_array($options) ? FreshRSS_http_Util::sanitizeCurlParams($options) : [];
 		if ($referer !== '') {
 			$options[CURLOPT_REFERER] = $referer;
 		}
 
-		$cachePath = CACHE_PATH . '/' . sha1($url) . ($type === 'html' ? '.html' : '.ico');
+		$cachePath = $noCache ? null : CACHE_PATH . '/' . sha1($url) . '.' . $type;
 		try {
 			return FreshRSS_http_Util::httpGet($url, cachePath: $cachePath, type: $type, curl_options: $options);
 		} catch (Throwable $exception) {
