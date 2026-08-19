@@ -316,10 +316,9 @@ final class IconFetcherExtension extends Minz_Extension
 	}
 
 	/**
-	 * RSSHub emits the channel image as RSS <channel><image><url>...</url>,
-	 * which corresponds to channel.image.url in its JSON representation.
-	 * Read the feed itself before looking at the website HTML so RSSHub's
-	 * channel avatar wins over a generic favicon on the source website.
+	 * Read feed-provided icons before looking at the website HTML so RSSHub's
+	 * RSS channel image, an Atom feed <logo>, or a JSON Feed icon wins over a
+	 * generic favicon on the source website.
 	 *
 	 * @param array<string,array{url:string,score:int,size:int,source:string}> $candidates
 	 */
@@ -342,7 +341,7 @@ final class IconFetcherExtension extends Minz_Extension
 			100,
 			0,
 			'invalid RSS channel image candidate',
-			'RSS/Atom channel.image.url',
+			'feed-provided icon',
 		);
 	}
 
@@ -357,6 +356,7 @@ final class IconFetcherExtension extends Minz_Extension
 				['image', 'url'],
 				['image'],
 				['icon'],
+				['favicon'],
 				['logo'],
 			];
 

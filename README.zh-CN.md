@@ -6,7 +6,7 @@
 
 ## 功能
 
-- **RSS/Atom 频道图标，包括 RSSHub**：优先读取订阅源的频道图标，例如 RSSHub 的 `channel.image.url`（XML 中为 `channel/image/url`）。
+- **RSS/Atom 和 JSON Feed 图标，包括 RSSHub**：优先读取 RSSHub 的 `channel.image.url`（XML 中为 `channel/image/url`）、Atom `<logo>`，以及 JSON Feed 的 `icon` / `favicon`。
 - **YouTube 频道头像**：将 YouTube 视频订阅源定位到频道页，使用频道头像而不是 YouTube 的通用 favicon。
 - **更广泛的 HTML 解析**：支持 `icon`、`shortcut icon`、`apple-touch-icon`、`mask-icon`、`fluid-icon` 和 `image_src`。
 - **现代元数据**：支持 Web App Manifest、Open Graph、Twitter Cards 和 JSON-LD。
@@ -17,7 +17,7 @@
 
 ## 图标来源优先级
 
-1. RSS/Atom 频道图标，包括 RSSHub 的 `channel.image.url`
+1. 订阅源提供的图标：RSS/RSSHub `channel.image.url`、Atom `<logo>` 或 JSON Feed `icon` / `favicon`
 2. `youtube.com/feeds/videos.xml?channel_id=...` 对应的 YouTube 频道头像
 3. HTML 中的 link 图标
 4. Web App Manifest 的 `icons`
@@ -74,7 +74,7 @@ git clone https://github.com/bowencool/xExtension-BroadIconFetcher.git
 FreshRSS feed Hook
         |
         v
-读取订阅源并解析 RSS/Atom 的 channel.image.url
+读取订阅源并解析 RSS/Atom/JSON Feed 的图标字段
         |
         +--> 成功：下载并存储频道图标
         +--> YouTube 视频订阅源：将频道页头像加入候选

@@ -19,7 +19,7 @@
 
 ### Features
 
-- **RSS/Atom channel icons, including RSSHub** — Reads a feed channel image such as RSSHub's `channel.image.url` (`channel/image/url` in XML) before checking the website.
+- **RSS/Atom and JSON Feed icons, including RSSHub** — Reads RSSHub's `channel.image.url` (`channel/image/url` in XML), Atom `<logo>`, and JSON Feed `icon` / `favicon` before checking the website.
 - **YouTube channel avatars** — Resolves YouTube video feeds to their channel page and uses the channel avatar rather than YouTube's generic favicon.
 - **Broad HTML discovery** — Supports `icon`, `shortcut icon`, `apple-touch-icon`, `mask-icon`, `fluid-icon`, and `image_src` links.
 - **Modern metadata** — Supports Web App Manifest icons, Open Graph, Twitter Cards, and JSON-LD image/logo/icon fields.
@@ -30,7 +30,7 @@
 
 ### Icon source priority
 
-1. RSS/Atom channel image, including RSSHub `channel.image.url`
+1. Feed-provided image: RSS/RSSHub `channel.image.url`, Atom `<logo>`, or JSON Feed `icon` / `favicon`
 2. YouTube channel avatar for `youtube.com/feeds/videos.xml?channel_id=...`
 3. HTML link icons
 4. Web App Manifest `icons`
@@ -46,7 +46,7 @@ Relative URLs, protocol-relative URLs, HTML `<base>` elements, and JSON/XML feed
 Subscribe to a feed
         |
         v
-Read channel.image.url from RSS/RSSHub
+Read feed-provided icon from RSS/RSSHub, Atom, or JSON Feed
         |
         +--> For YouTube video feeds, add the channel avatar as a candidate
         +--> Inspect website HTML and metadata
@@ -103,7 +103,7 @@ git clone https://github.com/bowencool/xExtension-BroadIconFetcher.git
 FreshRSS feed hook
         |
         v
-Fetch feed URL and inspect RSS/Atom channel.image.url
+Fetch feed URL and inspect its RSS/Atom/JSON Feed icon fields
         |
         +--> If valid, download and store the channel image
         +--> For YouTube video feeds, add the channel-page avatar as a candidate
