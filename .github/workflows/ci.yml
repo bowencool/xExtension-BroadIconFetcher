@@ -29,3 +29,15 @@ jobs:
       - name: Validate metadata
         run: |
           python3 -c 'import json; json.load(open("metadata.json")); print("metadata.json: valid")'
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
