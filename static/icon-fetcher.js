@@ -54,6 +54,11 @@ function initIconFetcher() {
 				status.textContent = `${completed}/${feeds.length} · ${feed.title}`;
 			}
 			status.textContent = `${succeeded}/${feeds.length}`;
+			if (succeeded > 0) {
+				// The feed list still contains the old icon DOM after the AJAX calls.
+				// Reload it so FreshRSS renders the newly stored favicon.
+				window.setTimeout(() => window.location.reload(), 500);
+			}
 		} catch (error) {
 			status.textContent = `Error: ${error.message}`;
 		} finally {
