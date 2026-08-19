@@ -27,4 +27,5 @@ jobs:
         run: node --check static/icon-fetcher.js
 
       - name: Validate metadata
-        run: python3 -c 'import json; json.load(open("metadata.json")); print("metadata.json: valid")'
+        run: |
+          python3 -c 'import json; json.load(open("metadata.json")); print("metadata.json: valid")'
