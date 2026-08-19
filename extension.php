@@ -213,35 +213,27 @@ final class IconFetcherExtension extends Minz_Extension
 	/**
 	 * Download and persist one feed icon.
 	 *
-	 * The first attributes-only call gives FreshRSS the final favicon path and
-	 * also lets us detect an icon explicitly owned by the user. The old
-	 * attributes are restored before any network request fails.
+	 * Do not use an attributes-only setCustomFavicon() call for an existing
+	 * extension icon. FreshRSS treats it as a replacement and deletes the old
+	 * file, even though this extension keeps the same stable favicon hash.
 	 */
 	private function setIconForFeed(FreshRSS_Feed $feed, bool $setValues = false, bool $force = false): bool {
 		$values = $setValues ? [] : null;
 		$oldAttributes = $feed->attributes();
+		$customFaviconExt = $feed->customFaviconExt();
 
-		try {
-			$path = $feed->setCustomFavicon(
-				extName: $this->getName(),
-				disallowDelete: false,
-				values: $values,
-			);
-			if ($path === null) {
-				$feed->_attributes($oldAttributes);
-				return false;
-			}
-
-			if (!$force && file_exists($path)) {
-				return true;
-			}
-		} catch (Throwable $exception) {
-			$feed->_attributes($oldAttributes);
-			$this->warning('Unable to prepare icon path for feed “' . $feed->name(true) . '”: ' . $exception->getMessage());
+		if ($feed->customFavicon() && $customFaviconExt === null) {
+			// Never overwrite a favicon explicitly chosen by the user.
 			return false;
 		}
 
-		$feed->_attributes($oldAttributes);
+		if ($customFaviconExt === $this->getName()) {
+			$path = FAVICONS_DIR . $feed->hashFavicon(skipCache: true) . '.ico';
+			if (!$force && file_exists($path)) {
+				return true;
+			}
+		}
+
 		$icon = $this->discoverIcon($feed, $force);
 		if ($icon === null) {
 			$this->warning('No usable icon found for feed “' . $feed->name(true) . '”.');
@@ -249,11 +241,8 @@ final class IconFetcherExtension extends Minz_Extension
 		}
 
 		try {
-			// FreshRSS deletes the old favicon after writing the replacement.
-			// This extension intentionally uses a stable hash, so the old and
-			// new paths are identical. Reset first to prevent FreshRSS from
-			// deleting the newly written icon during a forced refresh.
-			if ($feed->customFaviconExt() === $this->getName()) {
+			// Clear the same-hash old icon before, not after, writing its replacement.
+			if ($customFaviconExt === $this->getName()) {
 				$feed->resetCustomFavicon(values: $values);
 			}
 
