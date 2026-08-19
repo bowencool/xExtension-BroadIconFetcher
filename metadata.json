@@ -2,7 +2,7 @@
   "name": "Broad Site Icon Fetcher",
   "author": "Bowen",
   "description": "Fetch feed icons from more sources than the built-in favicon lookup.",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "entrypoint": "IconFetcher",
   "type": "user"
 }

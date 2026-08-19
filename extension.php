@@ -272,6 +272,13 @@ final class IconFetcherExtension extends Minz_Extension
 
 		$candidates = [];
 		$this->collectChannelImageCandidates($feed, $candidates, $force);
+		$youtubeChannelUrl = $this->youtubeChannelPageUrl(trim($feed->url()));
+		if ($youtubeChannelUrl !== null) {
+			$youtubeAvatar = $this->discoverYouTubeChannelAvatar($youtubeChannelUrl, $feed, $force);
+			if ($youtubeAvatar !== null) {
+				return $youtubeAvatar;
+			}
+		}
 		$response = $this->request($pageUrl, $feed, 'html', '', $force);
 		$html = is_string($response['body'] ?? null) ? $response['body'] : '';
 		$effectiveUrl = is_string($response['effective_url'] ?? null) ? $response['effective_url'] : $pageUrl;
@@ -281,9 +288,6 @@ final class IconFetcherExtension extends Minz_Extension
 			if (@$dom->loadHTML($html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING)) {
 				$xpath = new DOMXPath($dom);
 				$baseUrl = $this->documentBaseUrl($xpath, $effectiveUrl) ?? $effectiveUrl;
-				if ($this->youtubeChannelPageUrl($feed->url()) !== null) {
-					$this->collectYouTubeChannelAvatarCandidate($xpath, $baseUrl, $candidates);
-				}
 				$this->collectLinkCandidates($xpath, $baseUrl, $feed, $candidates, $force);
 				$this->collectMetaCandidates($xpath, $baseUrl, $candidates);
 				$this->collectJsonLdCandidates($xpath, $baseUrl, $candidates);
@@ -402,11 +406,6 @@ final class IconFetcherExtension extends Minz_Extension
 	}
 
 	private function feedPageUrl(FreshRSS_Feed $feed): ?string {
-		$youtubeChannelUrl = $this->youtubeChannelPageUrl(trim($feed->url()));
-		if ($youtubeChannelUrl !== null) {
-			return $youtubeChannelUrl;
-		}
-
 		$website = trim($feed->website());
 		$url = $website !== '' ? $website : trim($feed->url());
 		return $this->checkedUrl($url);
@@ -437,29 +436,49 @@ final class IconFetcherExtension extends Minz_Extension
 	}
 
 	/**
-	 * @param array<string,array{url:string,score:int,size:int,source:string}> $candidates
+	 * @return array{contents:string,source:string}|null
 	 */
-	private function collectYouTubeChannelAvatarCandidate(DOMXPath $xpath, string $baseUrl, array &$candidates): void {
+	private function discoverYouTubeChannelAvatar(string $channelUrl, FreshRSS_Feed $feed, bool $force = false): ?array {
+		$response = $this->request($channelUrl, $feed, 'html', '', $force);
+		$html = $response['body'] ?? null;
+		if (!is_string($html) || $html === '' || strlen($html) > self::MAX_HTML_BYTES) {
+			return null;
+		}
+
+		$dom = new DOMDocument();
+		if (!@$dom->loadHTML($html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING)) {
+			return null;
+		}
+
+		$effectiveUrl = is_string($response['effective_url'] ?? null) ? $response['effective_url'] : $channelUrl;
+		$xpath = new DOMXPath($dom);
+		$baseUrl = $this->documentBaseUrl($xpath, $effectiveUrl) ?? $effectiveUrl;
 		$nodes = $xpath->query(
 			'//link[@rel="image_src"]/@href'
 			. ' | //meta[@property="og:image"]/@content'
 			. ' | //meta[@name="twitter:image"]/@content'
 		);
 		if (!($nodes instanceof DOMNodeList)) {
-			return;
+			return null;
 		}
 
 		foreach ($nodes as $node) {
-			$this->addCandidate(
-				$candidates,
-				$this->resolveUrl($baseUrl, trim($node->textContent)),
-				96,
-				0,
-				'invalid YouTube channel avatar candidate',
-				'YouTube channel avatar',
-			);
-			return;
+			$avatarUrl = $this->resolveUrl($baseUrl, trim($node->textContent));
+			if ($avatarUrl === null) {
+				continue;
+			}
+
+			$iconResponse = $this->request($avatarUrl, $feed, 'ico', $effectiveUrl, $force);
+			$contents = $iconResponse['body'] ?? null;
+			if (is_string($contents) && $this->isImage($contents)) {
+				return [
+					'contents' => $contents,
+					'source' => 'YouTube channel avatar',
+				];
+			}
 		}
+
+		return null;
 	}
 
 	/**
