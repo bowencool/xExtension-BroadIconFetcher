@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/bowencool/xExtension-BroadIconFetcher/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/bowencool/xExtension-BroadIconFetcher/ci.yml?branch=main&label=CI" alt="CI" /></a>
-  <a href="https://github.com/bowencool/xExtension-BroadIconFetcher/blob/main/LICENSE"><img src="https://img.shields.io/github/license/bowencool/xExtension-BroadIconFetcher?color=blue" alt="License" /></a>
+  <a href="https://github.com/bowencool/xExtension-BroadIconFetcher/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="AGPL-3.0 License" /></a>
   <img src="https://img.shields.io/badge/PHP-%3E%3D8.1-8892BF?logo=php&logoColor=white" alt="PHP >= 8.1" />
   <img src="https://img.shields.io/badge/FreshRSS-Extension-green?logo=rss&logoColor=white" alt="FreshRSS Extension" />
 </p>
