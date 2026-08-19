@@ -1,6 +1,6 @@
 # FreshRSS Broad Site Icon Fetcher
 
-[English](#english) · [简体中文](#简体中文)
+[简体中文](README.zh-CN.md)
 
 <p align="center">
   <img src="https://freshrss.org/images/icon.svg" alt="FreshRSS" width="60" />
@@ -9,15 +9,13 @@
 <p align="center"><strong>Discover feed icons from RSS metadata, websites, manifests, and more.</strong></p>
 
 <p align="center">
-  <a href="https://github.com/bowencool/xExtension-BroadIconFetcher/actions/workflows/ci.yml"><img src="https://github.com/bowencool/xExtension-BroadIconFetcher/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://github.com/bowencool/xExtension-BroadIconFetcher/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/bowencool/xExtension-BroadIconFetcher/ci.yml?branch=main&label=CI" alt="CI" /></a>
   <a href="https://github.com/bowencool/xExtension-BroadIconFetcher/blob/main/LICENSE"><img src="https://img.shields.io/github/license/bowencool/xExtension-BroadIconFetcher?color=blue" alt="License" /></a>
   <img src="https://img.shields.io/badge/PHP-%3E%3D8.1-8892BF?logo=php&logoColor=white" alt="PHP >= 8.1" />
   <img src="https://img.shields.io/badge/FreshRSS-Extension-green?logo=rss&logoColor=white" alt="FreshRSS Extension" />
 </p>
 
 ---
-
-## English
 
 ### Features
 
@@ -135,52 +133,3 @@ Please fork the repository, create a feature branch, run the validation commands
 ### License
 
 This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
-
-## 简体中文
-
-### 功能
-
-- **RSS/Atom 频道图标**：优先读取 RSSHub 的 `channel.image.url`（XML 中为 `channel/image/url`）。
-- **更广泛的 HTML 解析**：支持 `icon`、`shortcut icon`、`apple-touch-icon`、`mask-icon`、`fluid-icon` 和 `image_src`。
-- **现代元数据**：支持 Web App Manifest、Open Graph、Twitter Cards 和 JSON-LD。
-- **安全回退链**：最后回退到站点 `/favicon.ico`，并由 FreshRSS 校验图片。
-- **自动与手动流程**：新订阅自动获取，并提供补齐、刷新和重置批量操作。
-- **保护用户图标**：不会覆盖用户明确上传的自定义图标。
-
-### 安装
-
-#### Git 安装
-
-```bash
-cd /path/to/FreshRSS/extensions
-git clone https://github.com/bowencool/xExtension-BroadIconFetcher.git
-```
-
-#### 手动安装
-
-1. 下载[最新 Release](https://github.com/bowencool/xExtension-BroadIconFetcher/releases)或仓库 ZIP。
-2. 解压到 FreshRSS 的 `extensions/` 目录。
-3. 如有需要，将目录名改为 `xExtension-BroadIconFetcher`。
-
-#### 启用
-
-1. 在 FreshRSS 中打开“配置 → 扩展”。
-2. 启用“Broad Site Icon Fetcher”。
-3. 打开扩展设置，调整自动获取选项或执行批量操作。
-
-### 配置与批量操作
-
-| 操作 | 说明 |
-| --- | --- |
-| **添加新订阅时自动获取图标** | 启用新订阅 Hook，默认开启。 |
-| **补齐缺失图标** | 处理没有本扩展图标文件的订阅。 |
-| **强制刷新扩展图标** | 重新请求并覆盖本扩展管理的图标。 |
-| **重置扩展图标** | 只删除本扩展设置的图标，保留用户上传的图标。 |
-
-### 开发与项目结构
-
-无需安装依赖或构建。要求 PHP 8.1+、FreshRSS，以及 PHP 的 `curl`、`dom` 和 `fileinfo` 扩展。开发检查命令与英文部分相同；项目目录为 `xExtension-BroadIconFetcher/`，其中包含扩展入口、配置页、前端脚本、翻译、CI 工作流、许可证和 README。
-
-### 贡献与许可
-
-欢迎 Fork、创建 feature 分支、运行检查命令并提交 Pull Request。本项目采用 [GNU Affero General Public License v3.0](LICENSE) 授权。
