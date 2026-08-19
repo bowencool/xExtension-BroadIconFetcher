@@ -39,12 +39,8 @@ final class IconFetcherExtension extends Minz_Extension
 			return null;
 		}
 
-		// The bulk action on the configuration page is still available for icons
-		// already managed by this extension.
-		if ($feed->customFaviconExt() === $this->getName()) {
-			return null;
-		}
-
+		// Keep the per-feed button for feeds already managed by this extension
+		// so a single feed icon can be re-fetched from its edit dialog.
 		return _url('extension', 'configure', 'e', urlencode($this->getName()));
 	}
 
