@@ -19,7 +19,7 @@ declare(strict_types=1);
 		<div class="group-controls">
 			<button type="button" class="btn" data-icon-action="fetch_missing"><?= _t('ext.icon_fetcher.fetch_missing') ?></button>
 			<button type="button" class="btn" data-icon-action="refresh_all"><?= _t('ext.icon_fetcher.refresh_all') ?></button>
-			<button type="submit" class="btn" name="icon_action" value="reset_icons"><?= _t('ext.icon_fetcher.reset') ?></button>
+			<button type="submit" class="btn" name="icon_action" value="reset_icons" data-str-confirm="<?= _t('ext.icon_fetcher.confirm_reset') ?>"><?= _t('ext.icon_fetcher.reset') ?></button>
 		</div>
 		<p class="form-help"><?= _t('ext.icon_fetcher.sources') ?></p>
 		<p id="icon_fetcher_status" role="status" aria-live="polite"></p>

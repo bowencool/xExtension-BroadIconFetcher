@@ -16,6 +16,9 @@ final class IconFetcherExtension extends Minz_Extension
 	public function init(): void {
 		parent::init();
 
+		// FAVICONS_DIR is only defined in lib/favicons.php, load it before use.
+		require_once LIB_PATH . '/favicons.php';
+
 		$this->registerHook('custom_favicon_btn_url', [$this, 'iconButtonUrl']);
 		$this->registerHook('custom_favicon_hash', [$this, 'iconHashParams']);
 		$this->registerHook('feed_before_insert', [$this, 'feedBeforeInsert']);

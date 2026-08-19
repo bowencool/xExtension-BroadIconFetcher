@@ -68,6 +68,16 @@ function initIconFetcher() {
 
 	form.querySelector('[data-icon-action="fetch_missing"]').addEventListener('click', () => run(false));
 	form.querySelector('[data-icon-action="refresh_all"]').addEventListener('click', () => run(true));
+
+	const resetButton = form.querySelector('[name="icon_action"][value="reset_icons"]');
+	if (resetButton) {
+		resetButton.addEventListener('click', (e) => {
+			const message = resetButton.getAttribute('data-str-confirm') || 'Are you sure?';
+			if (!window.confirm(message)) {
+				e.preventDefault();
+			}
+		});
+	}
 }
 
 window.addEventListener('load', initIconFetcher);
