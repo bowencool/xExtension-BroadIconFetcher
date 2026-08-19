@@ -36,8 +36,12 @@ final class IconFetcherExtension extends Minz_Extension
 			return null;
 		}
 
-		// Extension-owned icons may be refreshed individually from FreshRSS's
-		// native custom favicon dialog.
+		// The bulk action on the configuration page is still available for icons
+		// already managed by this extension.
+		if ($feed->customFaviconExt() === $this->getName()) {
+			return null;
+		}
+
 		return _url('extension', 'configure', 'e', urlencode($this->getName()));
 	}
 
@@ -272,13 +276,6 @@ final class IconFetcherExtension extends Minz_Extension
 
 		$candidates = [];
 		$this->collectChannelImageCandidates($feed, $candidates, $force);
-		$youtubeChannelUrl = $this->youtubeChannelPageUrl(trim($feed->url()));
-		if ($youtubeChannelUrl !== null) {
-			$youtubeAvatar = $this->discoverYouTubeChannelAvatar($youtubeChannelUrl, $feed, $force);
-			if ($youtubeAvatar !== null) {
-				return $youtubeAvatar;
-			}
-		}
 		$response = $this->request($pageUrl, $feed, 'html', '', $force);
 		$html = is_string($response['body'] ?? null) ? $response['body'] : '';
 		$effectiveUrl = is_string($response['effective_url'] ?? null) ? $response['effective_url'] : $pageUrl;
@@ -409,76 +406,6 @@ final class IconFetcherExtension extends Minz_Extension
 		$website = trim($feed->website());
 		$url = $website !== '' ? $website : trim($feed->url());
 		return $this->checkedUrl($url);
-	}
-
-	/**
-	 * YouTube's Atom video feeds do not contain a channel avatar, but their
-	 * channel page does expose one through standard HTML image metadata.
-	 */
-	private function youtubeChannelPageUrl(string $feedUrl): ?string {
-		$parts = parse_url($feedUrl);
-		if (!is_array($parts) || !is_string($parts['host'] ?? null) || !is_string($parts['path'] ?? null)) {
-			return null;
-		}
-
-		$host = strtolower($parts['host']);
-		if (!in_array($host, ['youtube.com', 'www.youtube.com', 'm.youtube.com'], true) || $parts['path'] !== '/feeds/videos.xml') {
-			return null;
-		}
-
-		parse_str(is_string($parts['query'] ?? null) ? $parts['query'] : '', $query);
-		$channelId = $query['channel_id'] ?? null;
-		if (!is_string($channelId) || preg_match('/^[A-Za-z0-9_-]{6,}$/', $channelId) !== 1) {
-			return null;
-		}
-
-		return $this->checkedUrl('https://www.youtube.com/channel/' . rawurlencode($channelId));
-	}
-
-	/**
-	 * @return array{contents:string,source:string}|null
-	 */
-	private function discoverYouTubeChannelAvatar(string $channelUrl, FreshRSS_Feed $feed, bool $force = false): ?array {
-		$response = $this->request($channelUrl, $feed, 'html', '', $force);
-		$html = $response['body'] ?? null;
-		if (!is_string($html) || $html === '' || strlen($html) > self::MAX_HTML_BYTES) {
-			return null;
-		}
-
-		$dom = new DOMDocument();
-		if (!@$dom->loadHTML($html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING)) {
-			return null;
-		}
-
-		$effectiveUrl = is_string($response['effective_url'] ?? null) ? $response['effective_url'] : $channelUrl;
-		$xpath = new DOMXPath($dom);
-		$baseUrl = $this->documentBaseUrl($xpath, $effectiveUrl) ?? $effectiveUrl;
-		$nodes = $xpath->query(
-			'//link[@rel="image_src"]/@href'
-			. ' | //meta[@property="og:image"]/@content'
-			. ' | //meta[@name="twitter:image"]/@content'
-		);
-		if (!($nodes instanceof DOMNodeList)) {
-			return null;
-		}
-
-		foreach ($nodes as $node) {
-			$avatarUrl = $this->resolveUrl($baseUrl, trim($node->textContent));
-			if ($avatarUrl === null) {
-				continue;
-			}
-
-			$iconResponse = $this->request($avatarUrl, $feed, 'ico', $effectiveUrl, $force);
-			$contents = $iconResponse['body'] ?? null;
-			if (is_string($contents) && $this->isImage($contents)) {
-				return [
-					'contents' => $contents,
-					'source' => 'YouTube channel avatar',
-				];
-			}
-		}
-
-		return null;
 	}
 
 	/**

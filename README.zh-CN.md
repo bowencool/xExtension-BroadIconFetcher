@@ -7,7 +7,6 @@
 ## 功能
 
 - **RSS/Atom 频道图标**：优先读取 RSSHub 的 `channel.image.url`（XML 中为 `channel/image/url`）。
-- **YouTube 频道头像**：识别 `feeds/videos.xml?channel_id=…`，读取其频道页公开的头像。
 - **更广泛的 HTML 解析**：支持 `icon`、`shortcut icon`、`apple-touch-icon`、`mask-icon`、`fluid-icon` 和 `image_src`。
 - **现代元数据**：支持 Web App Manifest、Open Graph、Twitter Cards 和 JSON-LD。
 - **安全回退链**：最后回退到站点 `/favicon.ico`，并由 FreshRSS 校验图片。
@@ -18,12 +17,11 @@
 ## 图标来源优先级
 
 1. RSS/Atom 频道图标，包括 RSSHub 的 `channel.image.url`
-2. YouTube 频道头像
-3. HTML 中的 link 图标
-4. Web App Manifest 的 `icons`
-5. Open Graph、Twitter Card 和通用图片元数据
-6. JSON-LD 的图片、Logo 和图标字段
-7. `/favicon.ico`
+2. HTML 中的 link 图标
+3. Web App Manifest 的 `icons`
+4. Open Graph、Twitter Card 和通用图片元数据
+5. JSON-LD 的图片、Logo 和图标字段
+6. `/favicon.ico`
 
 支持相对 URL、协议相对 URL、HTML `<base>`，以及 JSON/XML 订阅源响应。
 
@@ -55,7 +53,6 @@ git clone https://github.com/bowencool/xExtension-BroadIconFetcher.git
 | **添加新订阅时自动获取图标** | 启用新订阅 Hook，默认开启。 |
 | **补齐缺失图标** | 处理没有本扩展图标文件的订阅。 |
 | **强制刷新扩展图标** | 重新请求并覆盖本扩展管理的图标。 |
-| **单独刷新一个订阅图标** | 在该订阅的原生自定义图标对话框中运行本扩展的操作，只强制刷新这一个订阅。 |
 | **重置扩展图标** | 只删除本扩展设置的图标，保留用户上传的图标。 |
 
 ## 工作流程

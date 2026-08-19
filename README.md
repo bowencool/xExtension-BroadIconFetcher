@@ -20,7 +20,6 @@
 ### Features
 
 - **RSS/Atom channel icons** — Reads RSSHub's `channel.image.url` (`channel/image/url` in XML) before checking the website.
-- **YouTube channel avatars** — Resolves `feeds/videos.xml?channel_id=…` to its channel page and uses its published profile image.
 - **Broad HTML discovery** — Supports `icon`, `shortcut icon`, `apple-touch-icon`, `mask-icon`, `fluid-icon`, and `image_src` links.
 - **Modern metadata** — Supports Web App Manifest icons, Open Graph, Twitter Cards, and JSON-LD image/logo/icon fields.
 - **Safe fallback chain** — Falls back to `/favicon.ico` and validates downloaded image content through FreshRSS.
@@ -31,12 +30,11 @@
 ### Icon source priority
 
 1. RSS/Atom channel image, including RSSHub `channel.image.url`
-2. YouTube channel avatar
-3. HTML link icons
-4. Web App Manifest `icons`
-5. Open Graph, Twitter Card, and generic image metadata
-6. JSON-LD image/logo/icon fields
-7. `/favicon.ico`
+2. HTML link icons
+3. Web App Manifest `icons`
+4. Open Graph, Twitter Card, and generic image metadata
+5. JSON-LD image/logo/icon fields
+6. `/favicon.ico`
 
 Relative URLs, protocol-relative URLs, HTML `<base>` elements, and JSON/XML feed responses are supported.
 
@@ -84,7 +82,6 @@ git clone https://github.com/bowencool/xExtension-BroadIconFetcher.git
 | **Automatically fetch an icon when a new feed is added** | Enables the new-feed hook. Enabled by default. |
 | **Fetch missing icons** | Processes feeds without an icon file managed by this extension. |
 | **Refresh all extension icons** | Re-fetches and replaces icons managed by this extension. |
-| **Refresh one feed icon** | Open the feed's native custom-favicon dialog and run this extension's action to force-refresh only that feed. |
 | **Reset extension icons** | Removes only icons set by this extension; user-uploaded icons are preserved. |
 
 ### How It Works
