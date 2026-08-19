@@ -19,12 +19,12 @@
 
 ### Features
 
-- **RSSHub channel icons** — Reads RSSHub's `channel.image.url` (`channel/image/url` in XML) before checking the website.
+- **RSS/Atom channel icons, including RSSHub** — Reads a feed channel image such as RSSHub's `channel.image.url` (`channel/image/url` in XML) before checking the website.
 - **YouTube channel avatars** — Resolves YouTube video feeds to their channel page and uses the channel avatar rather than YouTube's generic favicon.
 - **Broad HTML discovery** — Supports `icon`, `shortcut icon`, `apple-touch-icon`, `mask-icon`, `fluid-icon`, and `image_src` links.
 - **Modern metadata** — Supports Web App Manifest icons, Open Graph, Twitter Cards, and JSON-LD image/logo/icon fields.
 - **Safe fallback chain** — Falls back to `/favicon.ico` and validates downloaded image content through FreshRSS.
-- **Automatic and manual workflows** — Fetches icons for new feeds and supports bulk fetch, refresh, and reset actions.
+- **Automatic, single-feed, and bulk workflows** — Fetches icons for new feeds, refreshes one feed from FreshRSS's favicon dialog, and supports bulk fetch, refresh, and reset actions.
 - **User-icon protection** — Never replaces a favicon explicitly uploaded by the user.
 - **Native FreshRSS integration** — Reuses FreshRSS HTTP, proxy, cache, favicon storage, and extension hooks.
 
@@ -48,8 +48,8 @@ Subscribe to a feed
         v
 Read channel.image.url from RSS/RSSHub
         |
-        +--> Download and validate the image
-        +--> Otherwise inspect website HTML and metadata
+        +--> For YouTube video feeds, add the channel avatar as a candidate
+        +--> Inspect website HTML and metadata
         +--> Finally try /favicon.ico
         |
         v
@@ -87,11 +87,12 @@ git clone https://github.com/bowencool/xExtension-BroadIconFetcher.git
 2. Enable **Broad Site Icon Fetcher**.
 3. Open the extension settings to change automatic fetching or run bulk actions.
 
-### Configuration and bulk actions
+### Configuration and icon actions
 
 | Action | Description |
 | --- | --- |
 | **Automatically fetch an icon when a new feed is added** | Enables the new-feed hook. Enabled by default. |
+| **Refresh one feed** | In the feed's favicon dialog, use the extension action to re-fetch only that feed's icon. |
 | **Fetch missing icons** | Processes feeds without an icon file managed by this extension. |
 | **Refresh all extension icons** | Re-fetches and replaces icons managed by this extension. |
 | **Reset extension icons** | Removes only icons set by this extension; user-uploaded icons are preserved. |
@@ -105,7 +106,8 @@ FreshRSS feed hook
 Fetch feed URL and inspect RSS/Atom channel.image.url
         |
         +--> If valid, download and store the channel image
-        +--> Otherwise inspect HTML, Manifest, metadata, JSON-LD, then favicon.ico
+        +--> For YouTube video feeds, add the channel-page avatar as a candidate
+        +--> Inspect HTML, Manifest, metadata, JSON-LD, then favicon.ico
         |
         v
 FreshRSS validates and stores the custom favicon
@@ -114,6 +116,8 @@ FreshRSS validates and stores the custom favicon
 ### Development
 
 No dependency installation or build step is required. Requirements: PHP 8.1+, FreshRSS, and PHP `curl`, `dom`, and `fileinfo` extensions.
+
+GitHub Actions runs the same checks on every push. Pushing a new `v*` tag creates a GitHub Release automatically after lint succeeds.
 
 ```bash
 php -l extension.php
@@ -132,9 +136,9 @@ xExtension-BroadIconFetcher/
 ├── configure.phtml            # Configuration and bulk actions
 ├── metadata.json              # FreshRSS metadata
 ├── static/icon-fetcher.js     # Bulk-action frontend
-├── screenshots/               # README screenshot and video demo
+├── screenshots/               # README screenshots and demo media
 ├── i18n/                      # English and Simplified Chinese translations
-├── .github/workflows/ci.yml  # Static validation workflow
+├── .github/workflows/ci.yml  # CI and tag-release workflow
 ├── LICENSE
 └── README.md
 ```
