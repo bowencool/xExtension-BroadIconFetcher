@@ -6,7 +6,7 @@
   <img src="https://freshrss.org/images/icon.svg" alt="FreshRSS" width="60" />
 </p>
 
-<p align="center"><strong>Discover feed icons from RSS metadata, websites, manifests, and more.</strong></p>
+<p align="center"><strong>Discover feed icons from RSS metadata, YouTube channel pages, websites, manifests, and more.</strong></p>
 
 <p align="center">
   <a href="https://github.com/bowencool/xExtension-BroadIconFetcher/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/bowencool/xExtension-BroadIconFetcher/ci.yml?branch=main&label=CI" alt="CI" /></a>
@@ -19,7 +19,8 @@
 
 ### Features
 
-- **RSS/Atom channel icons** — Reads RSSHub's `channel.image.url` (`channel/image/url` in XML) before checking the website.
+- **RSSHub channel icons** — Reads RSSHub's `channel.image.url` (`channel/image/url` in XML) before checking the website.
+- **YouTube channel avatars** — Resolves YouTube video feeds to their channel page and uses the channel avatar rather than YouTube's generic favicon.
 - **Broad HTML discovery** — Supports `icon`, `shortcut icon`, `apple-touch-icon`, `mask-icon`, `fluid-icon`, and `image_src` links.
 - **Modern metadata** — Supports Web App Manifest icons, Open Graph, Twitter Cards, and JSON-LD image/logo/icon fields.
 - **Safe fallback chain** — Falls back to `/favicon.ico` and validates downloaded image content through FreshRSS.
@@ -30,11 +31,12 @@
 ### Icon source priority
 
 1. RSS/Atom channel image, including RSSHub `channel.image.url`
-2. HTML link icons
-3. Web App Manifest `icons`
-4. Open Graph, Twitter Card, and generic image metadata
-5. JSON-LD image/logo/icon fields
-6. `/favicon.ico`
+2. YouTube channel avatar for `youtube.com/feeds/videos.xml?channel_id=...`
+3. HTML link icons
+4. Web App Manifest `icons`
+5. Open Graph, Twitter Card, and generic image metadata
+6. JSON-LD image/logo/icon fields
+7. `/favicon.ico`
 
 Relative URLs, protocol-relative URLs, HTML `<base>` elements, and JSON/XML feed responses are supported.
 
@@ -53,6 +55,18 @@ Read channel.image.url from RSS/RSSHub
         v
 Store the icon using FreshRSS's native favicon system
 ```
+
+### Screenshots and video demo
+
+#### Single-feed action
+
+<video src="screenshots/one.mp4" controls muted loop playsinline>
+  Your browser does not support the video tag.
+</video>
+
+#### Bulk actions
+
+![Bulk icon actions in FreshRSS](screenshots/bulk.png)
 
 ### Installation
 
@@ -120,6 +134,7 @@ xExtension-BroadIconFetcher/
 ├── configure.phtml            # Configuration and bulk actions
 ├── metadata.json              # FreshRSS metadata
 ├── static/icon-fetcher.js     # Bulk-action frontend
+├── screenshots/               # README screenshot and video demo
 ├── i18n/                      # English and Simplified Chinese translations
 ├── .github/workflows/ci.yml  # Static validation workflow
 ├── LICENSE

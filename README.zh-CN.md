@@ -2,11 +2,12 @@
 
 [English](README.md)
 
-一个 FreshRSS 第三方扩展，用来从 RSS 元数据、网站、Manifest 等更多来源获取订阅源图标。
+一个 FreshRSS 第三方扩展，用来从 RSS 元数据、YouTube 频道页、网站、Manifest 等更多来源获取订阅源图标。
 
 ## 功能
 
-- **RSS/Atom 频道图标**：优先读取 RSSHub 的 `channel.image.url`（XML 中为 `channel/image/url`）。
+- **RSSHub 频道图标**：优先读取 RSSHub 的 `channel.image.url`（XML 中为 `channel/image/url`）。
+- **YouTube 频道头像**：将 YouTube 视频订阅源定位到频道页，使用频道头像而不是 YouTube 的通用 favicon。
 - **更广泛的 HTML 解析**：支持 `icon`、`shortcut icon`、`apple-touch-icon`、`mask-icon`、`fluid-icon` 和 `image_src`。
 - **现代元数据**：支持 Web App Manifest、Open Graph、Twitter Cards 和 JSON-LD。
 - **安全回退链**：最后回退到站点 `/favicon.ico`，并由 FreshRSS 校验图片。
@@ -17,13 +18,26 @@
 ## 图标来源优先级
 
 1. RSS/Atom 频道图标，包括 RSSHub 的 `channel.image.url`
-2. HTML 中的 link 图标
-3. Web App Manifest 的 `icons`
-4. Open Graph、Twitter Card 和通用图片元数据
-5. JSON-LD 的图片、Logo 和图标字段
-6. `/favicon.ico`
+2. `youtube.com/feeds/videos.xml?channel_id=...` 对应的 YouTube 频道头像
+3. HTML 中的 link 图标
+4. Web App Manifest 的 `icons`
+5. Open Graph、Twitter Card 和通用图片元数据
+6. JSON-LD 的图片、Logo 和图标字段
+7. `/favicon.ico`
 
 支持相对 URL、协议相对 URL、HTML `<base>`，以及 JSON/XML 订阅源响应。
+
+## 截图与视频演示
+
+### 单个订阅源操作
+
+<video src="screenshots/one.mp4" controls muted loop playsinline>
+  你的浏览器不支持 video 标签。
+</video>
+
+### 批量操作
+
+![FreshRSS 中的批量图标操作](screenshots/bulk.png)
 
 ## 安装
 
@@ -91,6 +105,7 @@ xExtension-BroadIconFetcher/
 ├── configure.phtml
 ├── metadata.json
 ├── static/icon-fetcher.js
+├── screenshots/               # README 截图和视频演示
 ├── i18n/
 ├── .github/workflows/ci.yml
 ├── LICENSE
