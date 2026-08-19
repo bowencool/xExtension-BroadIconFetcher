@@ -84,6 +84,7 @@ git clone https://github.com/bowencool/xExtension-BroadIconFetcher.git
 | **Automatically fetch an icon when a new feed is added** | Enables the new-feed hook. Enabled by default. |
 | **Fetch missing icons** | Processes feeds without an icon file managed by this extension. |
 | **Refresh all extension icons** | Re-fetches and replaces icons managed by this extension. |
+| **Refresh one feed icon** | Open the feed's native custom-favicon dialog and run this extension's action to force-refresh only that feed. |
 | **Reset extension icons** | Removes only icons set by this extension; user-uploaded icons are preserved. |
 
 ### How It Works

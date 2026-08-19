@@ -36,12 +36,8 @@ final class IconFetcherExtension extends Minz_Extension
 			return null;
 		}
 
-		// The bulk action on the configuration page is still available for icons
-		// already managed by this extension.
-		if ($feed->customFaviconExt() === $this->getName()) {
-			return null;
-		}
-
+		// Extension-owned icons may be refreshed individually from FreshRSS's
+		// native custom favicon dialog.
 		return _url('extension', 'configure', 'e', urlencode($this->getName()));
 	}
 
