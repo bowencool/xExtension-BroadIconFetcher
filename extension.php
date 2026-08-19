@@ -249,6 +249,14 @@ final class IconFetcherExtension extends Minz_Extension
 		}
 
 		try {
+			// FreshRSS deletes the old favicon after writing the replacement.
+			// This extension intentionally uses a stable hash, so the old and
+			// new paths are identical. Reset first to prevent FreshRSS from
+			// deleting the newly written icon during a forced refresh.
+			if ($feed->customFaviconExt() === $this->getName()) {
+				$feed->resetCustomFavicon(values: $values);
+			}
+
 			$feed->setCustomFavicon(
 				$icon['contents'],
 				extName: $this->getName(),
